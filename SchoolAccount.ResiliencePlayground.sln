@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolAccount.ResiliencePlayground", "SchoolAccount.ResiliencePlayground\SchoolAccount.ResiliencePlayground.csproj", "{B1867D12-D524-4205-A0E7-62F5BE4C0AAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolAccount.ResiliencePlayground.Dashboard", "SchoolAccount.ResiliencePlayground.Dashboard\SchoolAccount.ResiliencePlayground.Dashboard.csproj", "{5110B723-EA50-4C55-AE56-AB1793FA861E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolAccount.ResiliencePlayground.EmulatedIntegration", "SchoolAccount.ResiliencePlayground.EmulatedIntegration\SchoolAccount.ResiliencePlayground.EmulatedIntegration.csproj", "{D85E6971-4598-4982-8A5D-B4695602C9EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{7FEF04D5-7CFB-44F2-9223-5C9795306670}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.run\All Emulated.run.xml = .run\All Emulated.run.xml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1867D12-D524-4205-A0E7-62F5BE4C0AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1867D12-D524-4205-A0E7-62F5BE4C0AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1867D12-D524-4205-A0E7-62F5BE4C0AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1867D12-D524-4205-A0E7-62F5BE4C0AAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5110B723-EA50-4C55-AE56-AB1793FA861E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5110B723-EA50-4C55-AE56-AB1793FA861E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5110B723-EA50-4C55-AE56-AB1793FA861E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5110B723-EA50-4C55-AE56-AB1793FA861E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D85E6971-4598-4982-8A5D-B4695602C9EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D85E6971-4598-4982-8A5D-B4695602C9EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D85E6971-4598-4982-8A5D-B4695602C9EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D85E6971-4598-4982-8A5D-B4695602C9EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
