@@ -184,7 +184,7 @@ A minimal, non-generic retry-only pipeline (it doesn't inspect the HTTP response
 - 2 attempts, constant 500 ms delay.
 - No log-trace hook.
 
-> **Design note:** `Monitor()` is what the `ServiceMonitor` background service uses. During development, before the Dashboard project's `Query` endpoint existed, `ServiceMonitor` was pointed at `ResiliencePipelineFactory.Create()` instead, to iron out any *quirks*.
+> **Design note:** `Create()` is what the `ServiceMonitor` background service uses. During development, before the Dashboard project's `Query` endpoint existed, `ServiceMonitor` was pointed at `ResiliencePipelineFactory.Monitor()` initially, this change to iron out any *quirks* and understandings of Polly.
 
 ### Request log trace
 
