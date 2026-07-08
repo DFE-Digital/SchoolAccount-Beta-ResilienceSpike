@@ -12,7 +12,7 @@ public class ServiceRegistry
 {
     private readonly ConcurrentDictionary<string, Service> _registry = new();
 
-    public void Register(ServiceManifest manifest, ResiliencePipeline<HttpResponseMessage> pipeline)
+    public void Register(ServiceManifest manifest, ResiliencePipeline pipeline)
     {
         _registry[manifest.ServiceName.ToLowerInvariant()] = new Service(manifest.ServiceName, manifest.BaseUrl, pipeline);
     }

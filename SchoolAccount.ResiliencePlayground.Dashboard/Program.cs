@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceRegistry();
 builder.Services.AddHostedService<ServiceMonitoring>();
+builder.Services.AddSingleton<ResilienceQueryHandler>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

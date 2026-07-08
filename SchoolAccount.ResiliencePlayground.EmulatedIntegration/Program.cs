@@ -72,7 +72,7 @@ static async Task<Operation> Resilience(EnvironmentSettings settings)
         await Task.Delay(settings.SlowDelayMs);
     }
 
-    if (settings.ErrorRate > 0d && random.NextDouble() < settings.ErrorRate)
+    if (settings.ErrorRate > 0d && random.NextDouble() <= settings.ErrorRate)
     {
         return Operation.Failed("Hit failure rate");
     }

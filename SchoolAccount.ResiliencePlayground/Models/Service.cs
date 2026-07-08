@@ -8,7 +8,7 @@ public class Service
     public string ServiceName { get; }
     public string BaseUrl { get; }
     
-    public ResiliencePipeline<HttpResponseMessage> Pipeline { get; set; }
+    public ResiliencePipeline Pipeline { get; set; }
 
     public List<ServiceState> History { get; init; } = [];
 
@@ -21,7 +21,7 @@ public class Service
         ? TimeSpan.FromMilliseconds(History.Average(x => x.Performance.Response.TotalMilliseconds))
         : TimeSpan.Zero;
 
-    public Service(string name, string url, ResiliencePipeline<HttpResponseMessage> pipeline)
+    public Service(string name, string url, ResiliencePipeline pipeline)
     {
         ServiceName = name;
         BaseUrl = url;

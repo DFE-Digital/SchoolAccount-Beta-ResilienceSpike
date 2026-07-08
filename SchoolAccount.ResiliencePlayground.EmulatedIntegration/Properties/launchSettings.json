@@ -8,7 +8,7 @@
       "applicationUrl": "http://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Environment__Name": "Emulation A"
+        "Environment__Name": "Emulation Healthy"
       }
     },
     "http-B": {
@@ -18,7 +18,7 @@
       "applicationUrl": "http://localhost:5002",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Environment__Name": "Emulation B",
+        "Environment__Name": "Emulation Faulty",
         "Environment__ErrorRate": 0.4
       }
     },
@@ -29,9 +29,20 @@
       "applicationUrl": "http://localhost:5003",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Environment__Name": "Emulation C",
+        "Environment__Name": "Emulation Slow",
         "Environment__SlowRate": 0.6,
         "Environment__SlowDelayMs": 2500
+      }
+    },
+    "http-D": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5004",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Environment__Name": "Emulation Down",
+        "Environment__ErrorRate": 1
       }
     }
   }

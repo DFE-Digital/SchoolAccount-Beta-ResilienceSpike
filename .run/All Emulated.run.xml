@@ -3,6 +3,7 @@
     <toRun name="SchoolAccount.ResiliencePlayground.EmulatedIntegration: http-A" type="LaunchSettings" />
     <toRun name="SchoolAccount.ResiliencePlayground.EmulatedIntegration: http-B" type="LaunchSettings" />
     <toRun name="SchoolAccount.ResiliencePlayground.EmulatedIntegration: http-C" type="LaunchSettings" />
+    <toRun name="SchoolAccount.ResiliencePlayground.EmulatedIntegration: http-D" type="LaunchSettings" />
     <method v="2" />
   </configuration>
 </component>
