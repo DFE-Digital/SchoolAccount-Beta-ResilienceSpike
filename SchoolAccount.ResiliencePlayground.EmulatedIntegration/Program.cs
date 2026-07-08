@@ -1,9 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using SchoolAccount.ResiliencePlayground;
 using SchoolAccount.ResiliencePlayground.EmulatedIntegration.Builders;

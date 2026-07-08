@@ -1,5 +1,3 @@
-using System;
-
 namespace SchoolAccount.ResiliencePlayground.Extensions;
 
 public static class DateOnlyExtensions

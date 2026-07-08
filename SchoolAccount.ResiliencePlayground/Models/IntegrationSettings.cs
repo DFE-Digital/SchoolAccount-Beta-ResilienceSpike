@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SchoolAccount.ResiliencePlayground.Models;
 
 public class IntegrationSettings
