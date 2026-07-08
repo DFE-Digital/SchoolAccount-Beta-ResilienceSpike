@@ -27,9 +27,9 @@ public sealed class ServiceRegistryHealthCheck(ServiceRegistry registry, string 
             ["lastChecked"] = current.LastChecked,
         };
 
-        if (current.Error?.Message is { } error)
+        if (!string.IsNullOrEmpty(current.Error?.Message))
         {
-            data["error"] = error;
+            data["error"] = current.Error.Message;
         }
 
         var result = current.Status switch
