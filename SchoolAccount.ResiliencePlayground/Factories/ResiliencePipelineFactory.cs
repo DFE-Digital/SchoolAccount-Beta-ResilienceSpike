@@ -11,33 +11,29 @@ public static class ResiliencePipelineFactory
 {
     public static readonly ResiliencePropertyKey<List<string>> LogTraceKey = new("RequestLogTrace");
 
-    public static List<string> GetOrCreateLogTrace(ResilienceContext context)
-    {
-        if (context.Properties.TryGetValue(LogTraceKey, out var logs))
-        {
-            return logs;
-        }
-
-        var newLogList = new List<string>();
-        context.Properties.Set(LogTraceKey, newLogList);
-
-        return newLogList;
-    }
-
     public static ResiliencePipeline Monitor()
     {
         return new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
             {
-                ShouldHandle = new PredicateBuilder().Handle<HttpRequestException>().Handle<TaskCanceledException>(),
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<TaskCanceledException>()
+                    .Handle<HttpRequestException>()
+                    .HandleResult(RetryPredicateHandler),
                 MaxRetryAttempts = 2,
                 Delay = TimeSpan.FromMilliseconds(500),
-                BackoffType = DelayBackoffType.Constant
+                BackoffType = DelayBackoffType.Constant,
+                OnRetry = OnRetryLogger,
+            })
+            .AddTimeout(new TimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromSeconds(1),
+                OnTimeout = OnTimeoutLogger
             })
             .Build();
     }
 
-    public static ResiliencePipeline<HttpResponseMessage> Create(ServiceManifest vendor, ResilienceSettings defaults)
+    public static ResiliencePipeline Create(ServiceManifest vendor, ResilienceSettings defaults)
     {
         var maxRetries = vendor.MaxRetryAttempts
                          ?? defaults.MaxRetryAttempts
@@ -52,38 +48,35 @@ public static class ResiliencePipelineFactory
                               ?? defaults.CircuitBreakAfterFailures
                               ?? throw new InvalidOperationException("Circuit break after failures not set");
 
-        return new ResiliencePipelineBuilder<HttpResponseMessage>()
-            .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+        var builder = new ResiliencePipelineBuilder();
+
+        if (maxRetries > 0 && delaySec > 0)
+        {
+            builder.AddRetry(new RetryStrategyOptions
             {
                 MaxRetryAttempts = maxRetries,
                 Delay = TimeSpan.FromSeconds(delaySec),
                 BackoffType = DelayBackoffType.Constant,
-                OnRetry = args => {
-                    if (args.Context.Properties.TryGetValue(LogTraceKey, out var logs)) {
-                        var reason = args.Outcome.Exception?.GetType().Name 
-                                     ?? args.Outcome.Result?.StatusCode.ToString();
-                        
-                        logs.Add($"[{LogType.Retry}] Attempt #{args.AttemptNumber + 1} due to: {reason}. Waiting 1s...");
-                    }
-                    return default;
-                },
-                ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                OnRetry = OnRetryLogger,
+                ShouldHandle = new PredicateBuilder()
                     .Handle<TimeoutRejectedException>()
                     .Handle<HttpRequestException>()
-                    .HandleResult(res => res.StatusCode is HttpStatusCode.ServiceUnavailable or HttpStatusCode.RequestTimeout),
-            })
-            .AddTimeout(new TimeoutStrategyOptions
+                    .HandleResult(RetryPredicateHandler),
+            });
+        }
+
+        if (timeoutSec > 0)
+        {
+            builder.AddTimeout(new TimeoutStrategyOptions
             {
                 Timeout = TimeSpan.FromSeconds(timeoutSec),
-                OnTimeout = (args) =>
-                {
-                    var logs = GetOrCreateLogTrace(args.Context);
-                    logs.Add($"[{LogType.Timeout}] Timeout exceeded after {args.Timeout.TotalSeconds}s limit");
+                OnTimeout = OnTimeoutLogger
+            });
+        }
 
-                    return default;
-                }
-            })
-            .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+        if (circuitFailures > 0)
+        {
+            builder.AddCircuitBreaker(new CircuitBreakerStrategyOptions
             {
                 FailureRatio = 0.5,
                 SamplingDuration = TimeSpan.FromSeconds(10),
@@ -91,7 +84,6 @@ public static class ResiliencePipelineFactory
                 BreakDuration = TimeSpan.FromSeconds(15),
                 OnOpened = args =>
                 {
-
                     var logs = GetOrCreateLogTrace(args.Context);
                     logs.Add(
                         $"[{LogType.CircuitBreaker}][OPEN] Failure criteria met! Outbound HTTP requests blocked for {args.BreakDuration.TotalSeconds}s.");
@@ -114,7 +106,65 @@ public static class ResiliencePipelineFactory
 
                     return default;
                 }
-            })
-            .Build();
+            });
+        }
+
+        return builder.Build();
+    }
+
+
+    private static List<string> GetOrCreateLogTrace(ResilienceContext context)
+    {
+        if (context.Properties.TryGetValue(LogTraceKey, out var logs))
+        {
+            return logs;
+        }
+
+        var newLogList = new List<string>();
+        context.Properties.Set(LogTraceKey, newLogList);
+
+        return newLogList;
+    }
+    
+    
+    private static ValueTask OnRetryLogger(OnRetryArguments<object> args)
+    {
+        if (!args.Context.Properties.TryGetValue(LogTraceKey, out var logs))
+        {
+            return default;
+        }
+
+        var reason = string.Empty;
+
+        if (args.Outcome.Result is HttpResponseMessage message)
+        {
+            reason = message.StatusCode.ToString();
+        }
+
+        if (args.Outcome.Exception is not null)
+        {
+            reason = args.Outcome.Exception.GetType().Name;
+        }
+
+        logs.Add($"[{LogType.Retry}] Attempt #{args.AttemptNumber + 1} due to: {reason}. Waiting {args.RetryDelay.TotalSeconds}s...");
+        return default;
+    }
+
+    private static bool RetryPredicateHandler(object res)
+    {
+        if (res is HttpResponseMessage response)
+        {
+            return response.StatusCode is HttpStatusCode.ServiceUnavailable or HttpStatusCode.RequestTimeout;
+        }
+
+        return false;
+    }
+    
+    private static ValueTask OnTimeoutLogger(OnTimeoutArguments args)
+    {
+        var logs = GetOrCreateLogTrace(args.Context);
+        logs.Add($"[{LogType.Timeout}] Timeout exceeded after {args.Timeout.TotalSeconds}s limit");
+
+        return default;
     }
 }
