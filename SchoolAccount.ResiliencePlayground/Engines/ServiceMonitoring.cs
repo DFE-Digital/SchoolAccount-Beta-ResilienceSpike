@@ -46,12 +46,13 @@ public class ServiceMonitoring(
 
             var currentRequestLogs = new List<string> { $"[{LogType.Start}]Initializing Request Connection" };
 
-            ResilienceContext context = ResilienceContextPool.Shared.Get();
+            var context = ResilienceContextPool.Shared.Get();
             context.Properties.Set(ResiliencePipelineFactory.LogTraceKey, currentRequestLogs);
 
             try
             {
-                var response = await serviceState.Pipeline
+                var response = await ResiliencePipelineFactory
+                    .Monitor()
                     .ExecuteAsync(
                         async (ctx, httpClient) => await httpClient.GetAsync(service.HealthEndpoint, ctx.CancellationToken), 
                         context, 
