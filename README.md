@@ -4,11 +4,12 @@ A small playground for building and running resilience/emulation test integratio
 
 ## Projects
 
-| Project | Description |
-| --- | --- |
-| `SchoolAccount.ResiliencePlayground` | core library and shared models. |
+| Project | Description                                                              |
+| --- |--------------------------------------------------------------------------|
+| `SchoolAccount.ResiliencePlayground` | core library and shared models.                                          |
 | `SchoolAccount.ResiliencePlayground.Dashboard` | a small ASP.NET app that shows the health/status of registered services. |
 | `SchoolAccount.ResiliencePlayground.EmulatedIntegration` | multiple small endpoints that emulate downstream integrations (A, B, C). |
+| `SchoolAccount.ResiliencePlayground.HealthChecksUI` | a dashboard app that utilises the ASP.NET HealthChecks UI.               |
 
 ## Build
 From the repository root run:
@@ -29,6 +30,12 @@ dotnet build SchoolAccount.ResiliencePlayground.Dashboard
 
 ```bash
 dotnet run --project SchoolAccount.ResiliencePlayground.Dashboard --launch-profile http
+```
+
+- HealthChecks UI Dashboard (HTTP profile)
+
+```bash
+dotnet run --project SchoolAccount.ResiliencePlayground.HealthChecksUI --launch-profile http
 ```
 
 - Emulated Integration (pick a profile A/B/C)
@@ -52,6 +59,7 @@ Note: Running backgrounded processes this way will print logs to the same termin
 - Emulation B: http://localhost:5002
 - Emulation C: http://localhost:5003
 - Dashboard: http://localhost:5124
+- HealthChecks UI Dashboard: http://localhost:5295/healthchecks-ui
 
 Useful endpoints provided by the emulated integration:
 - `/about`: returns the `EnvironmentSettings` for that instance.
