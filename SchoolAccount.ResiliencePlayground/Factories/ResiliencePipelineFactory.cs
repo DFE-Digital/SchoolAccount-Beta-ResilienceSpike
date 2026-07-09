@@ -2,6 +2,9 @@ using System.Net;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
+using Polly.Simmy;
+using Polly.Simmy.Fault;
+using Polly.Simmy.Latency;
 using Polly.Timeout;
 using SchoolAccount.ResiliencePlayground.Models;
 
@@ -33,7 +36,10 @@ public static class ResiliencePipelineFactory
             .Build();
     }
 
-    public static ResiliencePipeline Create(ServiceManifest vendor, ResilienceSettings defaults)
+    public static ResiliencePipeline Create(
+        ServiceManifest vendor,
+        ResilienceSettings defaults,
+        ChaosSettings chaos)
     {
         var maxRetries = vendor.MaxRetryAttempts
                          ?? defaults.MaxRetryAttempts
@@ -109,9 +115,36 @@ public static class ResiliencePipelineFactory
             });
         }
 
+        builder.AddChaosLatency(new ChaosLatencyStrategyOptions
+        {
+            Enabled = chaos.LatencyEnabled,
+            InjectionRate = chaos.LatencyInjectionRate,
+            Latency = TimeSpan.FromSeconds(chaos.LatencySeconds),
+            OnLatencyInjected = args =>
+            {
+                GetOrCreateLogTrace(args.Context)
+                    .Add($"[{LogType.Chaos}] Injected {args.Latency.TotalSeconds}s latency");
+                return default;
+            }
+        });
+
+        builder.AddChaosFault(new ChaosFaultStrategyOptions
+        {
+            Enabled = chaos.FaultEnabled,
+            InjectionRate = chaos.FaultInjectionRate,
+            FaultGenerator = _ => ValueTask.FromResult<Exception?>(
+                new HttpRequestException("Simmy injected fault", inner: null,
+                    statusCode: HttpStatusCode.InternalServerError)),
+            OnFaultInjected = args =>
+            {
+                GetOrCreateLogTrace(args.Context)
+                    .Add($"[{LogType.Chaos}] Injected fault: {args.Fault.GetType().Name}");
+                return default;
+            }
+        });
+
         return builder.Build();
     }
-
 
     private static List<string> GetOrCreateLogTrace(ResilienceContext context)
     {

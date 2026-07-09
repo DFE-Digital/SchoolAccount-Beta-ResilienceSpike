@@ -7,4 +7,5 @@ public class ResilienceSettings
     public double? TimeoutSeconds { get; set; }
     public int? CircuitBreakAfterFailures { get; set; }
     public double? DegradedResponseThresholdSeconds { get; set; }
+    public ChaosSettings? Chaos { get; set; }
 }

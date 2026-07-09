@@ -113,5 +113,6 @@ public enum LogType
     Retry,
     CircuitBreaker,
     Complete,
-    Failed
+    Failed,
+    Chaos
 }

@@ -61,7 +61,10 @@ public static class ServiceRegistryCacheExtensions
         foreach (var vendor in options.Services)
         {
             builder.Services.AddHttpClient(vendor.ServiceName, c => c.BaseAddress = new Uri(vendor.BaseUrl));
-            registry.Register(vendor, ResiliencePipelineFactory.Create(vendor, options.Defaults));
+            registry.Register(vendor, ResiliencePipelineFactory.Create(
+                vendor,
+                options.Defaults,
+                vendor.Chaos ?? options.Defaults.Chaos ?? new ChaosSettings()));
         }
         
         builder.Services.AddSingleton(registry);
