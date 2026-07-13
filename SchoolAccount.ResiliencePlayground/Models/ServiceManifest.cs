@@ -7,6 +7,4 @@ public class ServiceManifest : ResilienceSettings
 
     public string HealthEndpoint { get; init; } = "/health";
     public string TaskEndpoint { get; init; } = "/tasks";
-
-    public ChaosSettings? Chaos { get; set; }
 }

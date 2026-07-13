@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SchoolAccount.ResiliencePlayground")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+587bb69c3867fb46fbd40dfe7e8e842d094096f9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72bcea2d038746d51cf433c7533dcdcec5939855")]
 [assembly: System.Reflection.AssemblyProductAttribute("SchoolAccount.ResiliencePlayground")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SchoolAccount.ResiliencePlayground")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
