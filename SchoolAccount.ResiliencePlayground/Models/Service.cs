@@ -12,14 +12,18 @@ public class Service
 
     public List<ServiceState> History { get; init; } = [];
 
-    public ServiceState CurrentState => History.Count > 0
-        ? History.MaxBy(x => x.LastChecked) ?? throw new ApplicationException()
-        : new ServiceState(ServiceStatus.Unknown,
-            new ServicePerformance(0, TimeSpan.Zero, DateTime.UtcNow), []);
+    public ServiceState CurrentState(TrafficSource source) =>
+        History.Where(x => x.Source == source).MaxBy(x => x.LastChecked)
+        ?? new ServiceState(DateTime.UtcNow, source, ServiceStatus.Unknown,
+            new ServicePerformance(0, TimeSpan.Zero, DateTime.UtcNow), Logs: []);
 
-    public TimeSpan AverageResponseTime => History.Count > 0
-        ? TimeSpan.FromMilliseconds(History.Average(x => x.Performance.Response.TotalMilliseconds))
-        : TimeSpan.Zero;
+    public TimeSpan AverageResponseTime(TrafficSource source)
+    {
+        var relevant = History.Where(x => x.Source == source).ToList();
+        return relevant.Count > 0
+            ? TimeSpan.FromMilliseconds(relevant.Average(x => x.Performance.Response.TotalMilliseconds))
+            : TimeSpan.Zero;
+    }
 
     public Service(string name, string url, ResiliencePipeline pipeline)
     {
@@ -31,18 +35,19 @@ public class Service
 
 public record ServiceState(
     DateTime LastChecked,
+    TrafficSource Source,
     ServiceStatus Status,
     ServicePerformance Performance,
     Error? Error = null,
     List<Log> Logs = null!)
 {
-    public ServiceState(ServiceStatus status, ServicePerformance performance, List<string> Logs)
-        : this(DateTime.UtcNow, status, performance, Logs: Logs.Select(x => new Log(x)).ToList())
+    public ServiceState(TrafficSource source, ServiceStatus status, ServicePerformance performance, List<string> logs)
+        : this(DateTime.UtcNow, source, status, performance, Logs: logs.Select(x => new Log(x)).ToList())
     {
     }
 
-    public ServiceState(ServiceStatus status, string message, ServicePerformance performance, List<string> Logs)
-        : this(DateTime.UtcNow, status, performance, new Error(message), Logs.Select(x => new Log(x)).ToList())
+    public ServiceState(TrafficSource source, ServiceStatus status, string message, ServicePerformance performance, List<string> logs)
+        : this(DateTime.UtcNow, source, status, performance, new Error(message), logs.Select(x => new Log(x)).ToList())
     {
     }
 }

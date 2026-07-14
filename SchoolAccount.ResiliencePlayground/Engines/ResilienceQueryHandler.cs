@@ -17,7 +17,11 @@ public class ResilienceQueryHandler(
 {
     private readonly IntegrationSettings _settings = options.Value;
 
-    public async Task<Operation<T>> GetAsync<T>(string requestUrl, ServiceManifest service, ResiliencePipeline? enforcedResilience,
+    public async Task<Operation<T>> GetAsync<T>(
+        string requestUrl,
+        ServiceManifest service,
+        TrafficSource source,
+        ResiliencePipeline? enforcedResilience,
         CancellationToken cancellationToken)
     {
         var serviceState = registry.Get(service.ServiceName);
@@ -62,7 +66,8 @@ public class ResilienceQueryHandler(
 
             currentRequestLogs.Add($"[{LogType.Complete}] Response Complete with HTTP status code: {statusCode}");
             registry.UpdateStatus(service.ServiceName,
-                new ServiceState(state, ServicePerformance.Create(statusCode, stopwatch.ElapsedMilliseconds),
+                new ServiceState(source, state,
+                    ServicePerformance.Create(statusCode, stopwatch.ElapsedMilliseconds),
                     currentRequestLogs));
         }
         catch (Exception ex)
@@ -77,8 +82,9 @@ public class ResilienceQueryHandler(
             currentRequestLogs.Add($"[{LogType.Failed}] Execution Exception: {ex.GetType().Name} - {ex.Message}");
             logger.LogWarning("[ServiceMonitoring] {Name} is unreachable after retries.", service.ServiceName);
             registry.UpdateStatus(service.ServiceName,
-                new ServiceState(ServiceStatus.Error, ex.Message,
-                    ServicePerformance.Create(statusCode, stopwatch.ElapsedMilliseconds), currentRequestLogs));
+                new ServiceState(source, ServiceStatus.Error, ex.Message,
+                    ServicePerformance.Create(statusCode, stopwatch.ElapsedMilliseconds),
+                    currentRequestLogs));
         }
         finally
         {

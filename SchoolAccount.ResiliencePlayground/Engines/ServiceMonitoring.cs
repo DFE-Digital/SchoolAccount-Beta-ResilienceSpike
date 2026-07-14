@@ -1,8 +1,6 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly;
 using SchoolAccount.ResiliencePlayground.Factories;
 using SchoolAccount.ResiliencePlayground.Models;
 
@@ -20,7 +18,7 @@ public class ServiceMonitoring(
     {
         logger.LogInformation("[ServiceMonitoring] Background Integration Monitor started.");
 
-        var monitoringTasks = _options.Services.Select(service => 
+        var monitoringTasks = _options.Services.Select(service =>
             Task.Run(() => MonitorService(service, cancellationToken), cancellationToken)
         );
 
@@ -31,11 +29,15 @@ public class ServiceMonitoring(
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            await queryHandler.GetAsync<Nothing>(service.HealthEndpoint, service, ResiliencePipelineFactory.Monitor(),
-                cancellationToken);
-            
             try
             {
+                await queryHandler.GetAsync<Nothing>(
+                    service.HealthEndpoint,
+                    service,
+                    TrafficSource.Probe,
+                    ResiliencePipelineFactory.Monitor(),
+                    cancellationToken);
+                
                 await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
             }
             catch (TaskCanceledException)

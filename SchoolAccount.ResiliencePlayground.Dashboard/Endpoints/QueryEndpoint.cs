@@ -12,19 +12,19 @@ public class QueryEndpoint : IEndpoint
     public static void MapEndpoint(WebApplication app)
     {
         app.MapGet("/query", async (
-            [FromServices] IOptions<IntegrationSettings> options, 
-            [FromServices] ServiceRegistry registry, 
-            [FromServices] ResilienceQueryHandler queryHandler, 
+            [FromServices] IOptions<IntegrationSettings> options,
+            [FromServices] ServiceRegistry registry,
+            [FromServices] ResilienceQueryHandler queryHandler,
             CancellationToken cancellationToken) =>
         {
             var settings = options.Value;
-            
+
             try
             {
-                var queryingTasks = settings.Services.Select(service => 
-                     GetPayloadAsync(queryHandler, registry, service, cancellationToken)
+                var queryingTasks = settings.Services.Select(service =>
+                    GetPayloadAsync(queryHandler, registry, service, cancellationToken)
                 );
-                
+
                 var results = await Task.WhenAll(queryingTasks);
 
                 return Results.Json(Operation.Ok(results));
@@ -36,19 +36,20 @@ public class QueryEndpoint : IEndpoint
         });
     }
 
-    private static async Task<Payload<PayloadTaskEntity>> GetPayloadAsync(ResilienceQueryHandler queryHandler, 
-        ServiceRegistry registry, 
+    private static async Task<Payload<PayloadTaskEntity>> GetPayloadAsync(ResilienceQueryHandler queryHandler,
+        ServiceRegistry registry,
         ServiceManifest manifest,
         CancellationToken cancellationToken)
     {
         var service = registry.Get(manifest.ServiceName);
 
-        if (service is null)
-        {
-            throw new ApplicationException($"Could not find service \"{manifest.ServiceName}\"");
-        }
-        
-        var query = await queryHandler.GetAsync<Operation<List<PayloadTaskEntity>>>(manifest.TaskEndpoint, manifest, null,
+        if (service is null) throw new ApplicationException($"Could not find service \"{manifest.ServiceName}\"");
+
+        var query = await queryHandler.GetAsync<Operation<List<PayloadTaskEntity>>>(
+            manifest.TaskEndpoint,
+            manifest,
+            TrafficSource.Query,
+            null,
             cancellationToken);
 
         var serviceIdentifier = new PayloadService
@@ -56,9 +57,8 @@ public class QueryEndpoint : IEndpoint
             Name = service.ServiceName,
             QueryPath = manifest.TaskEndpoint
         };
-        
+
         if (!query.Success)
-        {
             return new Payload<PayloadTaskEntity>
             {
                 Service = serviceIdentifier,
@@ -67,7 +67,6 @@ public class QueryEndpoint : IEndpoint
                     StatusCode = 503
                 }
             };
-        }
 
         var payload = new Payload<PayloadTaskEntity>
         {
@@ -84,7 +83,7 @@ public class QueryEndpoint : IEndpoint
                 })
                 .ToList()
         };
-        
+
         return payload;
     }
 }

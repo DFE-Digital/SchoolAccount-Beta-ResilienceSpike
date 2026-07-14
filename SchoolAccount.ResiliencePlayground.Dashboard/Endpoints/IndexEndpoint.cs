@@ -18,27 +18,21 @@ public class IndexEndpoint : IEndpoint
             var views = services
                 .Select(vendor =>
                 {
-                    // double failureRate = vendor.TotalRequests > 0 
-                    //     ? Math.Round(((double)vendor.FailedRequests / vendor.TotalRequests) * 100, 1) 
-                    //     : 0;
+                    var queryState = vendor.CurrentState(TrafficSource.Probe);
 
                     return new
                     {
                         Vendor = vendor.ServiceName,
                         Endpoint = vendor.BaseUrl,
-                
-                        Health = new {
-                            CurrentStatus = vendor.CurrentState.Status.ToObject(),
-                            LastCheckedAt = vendor.CurrentState.LastChecked,
-                            LastKnownError = vendor.CurrentState.Error?.Message ?? null
-                        },
-                
-                        // Telemetry = new {
-                        //     TotalCallsEvaluated = vendor.TotalRequests,
-                        //     SuccessCount = vendor.SuccessfulRequests,
-                        //     FailureCount = vendor.FailedRequests,
-                        //     CalculatedFailureRate = $"{failureRate}%"
-                        // }
+
+                        Health = new
+                        {
+                            CurrentStatus = queryState.Status.ToObject(),
+                            LastCheckedAt = queryState.LastChecked,
+                            LastKnownError = queryState.Error?.Message
+                        }
+                        
+                        
                     };
                 })
                 .ToList();

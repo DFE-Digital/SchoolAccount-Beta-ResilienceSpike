@@ -14,6 +14,7 @@ public class StatusEndpoint : IEndpoint
         app.MapGet("/status", ([FromServices] ServiceRegistry registry) =>
         {
             var services = registry.All();
+            
             var htmlBuilder = new StringBuilder();
 //<meta http-equiv="refresh" content="1"> <!-- Snappy 1-second auto-refresh -->
             htmlBuilder.Append("""
@@ -35,6 +36,9 @@ public class StatusEndpoint : IEndpoint
                                        .badge.online { background: rgba(16, 185, 129, 0.1); color: var(--online); border: 1px solid var(--online); }
                                        .badge.degraded { background: rgba(185, 185, 129, 0.1); color: var(--warn); border: 1px solid var(--warn); }
                                        .badge.offline { background: rgba(244, 63, 94, 0.1); color: var(--offline); border: 1px solid var(--offline); }
+                                       .badge-stack { display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-end; }
+                                       .badge.sub { font-size: 0.6rem; opacity: 0.85; }
+                                       .source-tag { font-size: 0.65rem; color: var(--muted); font-family: monospace; text-transform: uppercase; }
                                        
                                        /* Performance Styles */
                                        .metrics-panel { display: flex; justify-content: space-between; background: #0f172a; border-radius: 8px; padding: 1rem; margin-top: 1.25rem; border: 1px solid #1e293b; }
@@ -67,50 +71,63 @@ public class StatusEndpoint : IEndpoint
 
             foreach (var service in services)
             {
-                var badgeClass = service.CurrentState.Status switch
+                var snapshot = service.History.ToList();
+                var queryHistory = snapshot.Where(x => x.Source == TrafficSource.Query).ToList();
+
+                var observed = service.CurrentState(TrafficSource.Query);
+                var reported = service.CurrentState(TrafficSource.Probe); 
+
+                var observedClass = observed.Status switch
+                {
+                    ServiceStatus.Healthy => "online",
+                    ServiceStatus.Degraded => "degraded",
+                    _ => "offline"
+                };
+                var reportedClass = reported.Status switch
                 {
                     ServiceStatus.Healthy => "online",
                     ServiceStatus.Degraded => "degraded",
                     _ => "offline"
                 };
 
-                htmlBuilder.Append($"""
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <div>
-                                                    <h2 class="vendor-name">{service.ServiceName}</h2>
-                                                    <div class="vendor-url">{service.BaseUrl}</div>
+                htmlBuilder.Append($$"""
+                                         <div class="card">
+                                             <div class="card-header">
+                                                 <div>
+                                                     <h2 class="vendor-name">{{service.ServiceName}}</h2>
+                                                     <div class="vendor-url">{{service.BaseUrl}}</div>
+                                                 </div>
+                                                 <div class="badge-stack">
+                                                     <span class="badge {observedClass}">Observed: {observed.Status.ToHumanString()}</span>
+                                                     <span class="badge sub {reportedClass}">Reported: {reported.Status.ToHumanString()}</span>
                                                 </div>
-                                                <span class="badge {badgeClass}">{service.CurrentState.Status.ToHumanString()}</span>
-                                            </div>
+                                             </div>
 
-                                            <!-- Timing & Performance Analytics Panel -->
-                                            <div class="metrics-panel">
-                                                <div class="metric-box">
-                                                    <div class="metric-val" style="color: #3b82f6;">{service.CurrentState.Performance.Response.TotalSeconds.ToString("#,##0.00")}<span style="font-size:0.7rem;color:var(--muted)">s</span></div>
-                                                    <div class="metric-lbl">Last Latency</div>
-                                                </div>
-                                                <div class="metric-box">
-                                                    <div class="metric-val" style="color: var(--warn);">{service.AverageResponseTime.TotalSeconds:#,##0.00}<span style="font-size:0.7rem;color:var(--muted)">s</span></div>
-                                                    <div class="metric-lbl">Avg Latency</div>
-                                                </div>
-                                                <div class="metric-box">
-                                                    <div class="metric-val" style="color: var(--online);">{service.History.Count(x => x.Status == ServiceStatus.Healthy)}</div>
-                                                    <div class="metric-lbl">Healthy</div>
-                                                </div>
-                                                <div class="metric-box">
-                                                    <div class="metric-val" style="color: var(--warn);">{service.History.Count(x => x.Status != ServiceStatus.Healthy)}</div>
-                                                    <div class="metric-lbl">Degraded</div>
-                                                </div>
-                                                <div class="metric-box">
-                                                    <div class="metric-val" style="color: var(--text);">{service.History.Count}</div>
-                                                    <div class="metric-lbl">Total Checks</div>
-                                                </div>
-                                            </div>
-                                            <div class="state-list">
-                                    """);
+                                             <!-- Timing & Performance Analytics Panel -->
+                                             <<div class="metric-box">
+                                         <div class="metric-val" style="color: #3b82f6;">{observed.Performance.Response.TotalSeconds:#,##0.00}<span style="font-size:0.7rem;color:var(--muted)">s</span></div>
+                                         <div class="metric-lbl">Last Latency</div>
+                                     </div>
+                                     <div class="metric-box">
+                                         <div class="metric-val" style="color: var(--warn);">{service.ResponseTimeFor(TrafficSource.Query).TotalSeconds:#,##0.00}<span style="font-size:0.7rem;color:var(--muted)">s</span></div>
+                                         <div class="metric-lbl">Avg Latency</div>
+                                     </div>
+                                     <div class="metric-box">
+                                         <div class="metric-val" style="color: var(--online);">{queryHistory.Count(x => x.Status == ServiceStatus.Healthy)}</div>
+                                         <div class="metric-lbl">Healthy</div>
+                                     </div>
+                                     <div class="metric-box">
+                                         <div class="metric-val" style="color: var(--warn);">{queryHistory.Count(x => x.Status != ServiceStatus.Healthy)}</div>
+                                         <div class="metric-lbl">Unhealthy</div>
+                                     </div>
+                                     <div class="metric-box">
+                                         <div class="metric-val" style="color: var(--text);">{queryHistory.Count}</div>
+                                         <div class="metric-lbl">Query Calls</div>
+                                     </div>
+                                             <div class="state-list">
+                                     """);
 
-                foreach (var history in service.History.TakeLast(15).Reverse())
+                foreach (var history in snapshot.TakeLast(15).Reverse())
                 {
                     var codeClass = history.Status switch
                     {
@@ -120,30 +137,32 @@ public class StatusEndpoint : IEndpoint
                         _ => "http-none"
                     };
                     var codeDisplay = history.Performance.StatusCode?.ToString() ?? "NONE";
-                    htmlBuilder.Append($"""
-                                            <div class="last-state {codeClass}">
-                                                <div>
-                                                    <span style="color: var(--muted)">Status</span> 
-                                                    <span style="font-family: monospace;">{history.Status.ToHumanString()}</span>
-                                                </div>
-                                                <div>
-                                                    <span style="color: var(--muted)">Timestamp</span> 
-                                                    <span style="font-family: monospace;">{history.Performance.Timestamp.ToString("HH:mm:ss")}</span>
-                                                </div>
-                                                <div>
-                                                    <span style="color: var(--muted)">Duration</span> 
-                                                    <span style="font-family: monospace;">{history.Performance.Response.TotalSeconds.ToString("#,##0.00")}s</span>
-                                                </div>
-                                                <div>
-                                                    <span style="color: var(--muted); margin-right: 0.25rem;">State</span>
-                                                    <span class="http-code http-none">{codeDisplay}</span>
-                                                </div>
-                                        """);
+                    htmlBuilder.Append($$"""
+                                             <div class="last-state {{codeClass}}">
+                                                 <div>
+                                                     <span style="color: var(--muted)">Status</span> 
+                                                     <span style="font-family: monospace;">{{history.Status.ToHumanString()}}</span>
+                                                 </div>
+                                                 <div>
+                                                    <span style="color: var(--muted)">Source</span>
+                                                    <span class="source-tag">{history.Source}</span>
+                                                 </div>
+                                                 <div>
+                                                     <span style="color: var(--muted)">Timestamp</span> 
+                                                     <span style="font-family: monospace;">{{history.Performance.Timestamp.ToString("HH:mm:ss")}}</span>
+                                                 </div>
+                                                 <div>
+                                                     <span style="color: var(--muted)">Duration</span> 
+                                                     <span style="font-family: monospace;">{{history.Performance.Response.TotalSeconds.ToString("#,##0.00")}}s</span>
+                                                 </div>
+                                                 <div>
+                                                     <span style="color: var(--muted); margin-right: 0.25rem;">State</span>
+                                                     <span class="http-code http-none">{{codeDisplay}}</span>
+                                                 </div>
+                                         """);
 
                     if (!history.Logs.All(x => x.Type is LogType.Start or LogType.Complete))
-                    {
                         foreach (var log in history.Logs)
-                        {
                             htmlBuilder.Append($"""
                                                     <div class="last-state log">
                                                         <div>
@@ -156,8 +175,6 @@ public class StatusEndpoint : IEndpoint
                                                         </div>
                                                     </div>
                                                 """);
-                        }
-                    }
 
                     htmlBuilder.Append("""    
                                            </div>
