@@ -31,8 +31,6 @@ public class IndexEndpoint : IEndpoint
                             LastCheckedAt = queryState.LastChecked,
                             LastKnownError = queryState.Error?.Message
                         }
-                        
-                        
                     };
                 })
                 .ToList();

@@ -43,7 +43,10 @@ public class QueryEndpoint : IEndpoint
     {
         var service = registry.Get(manifest.ServiceName);
 
-        if (service is null) throw new ApplicationException($"Could not find service \"{manifest.ServiceName}\"");
+        if (service is null)
+        {
+            throw new ApplicationException($"Could not find service \"{manifest.ServiceName}\"");
+        }
 
         var query = await queryHandler.GetAsync<Operation<List<PayloadTaskEntity>>>(
             manifest.TaskEndpoint,
@@ -59,6 +62,7 @@ public class QueryEndpoint : IEndpoint
         };
 
         if (!query.Success)
+        {
             return new Payload<PayloadTaskEntity>
             {
                 Service = serviceIdentifier,
@@ -67,6 +71,7 @@ public class QueryEndpoint : IEndpoint
                     StatusCode = 503
                 }
             };
+        }
 
         var payload = new Payload<PayloadTaskEntity>
         {

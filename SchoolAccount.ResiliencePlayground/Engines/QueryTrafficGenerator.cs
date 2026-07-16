@@ -32,8 +32,8 @@ public class QueryTrafficGenerator(
                 await queryHandler.GetAsync<Nothing>(
                     service.TaskEndpoint,
                     service,
-                    TrafficSource.Query,   // real-traffic tagging from last time
-                    enforcedResilience: null,  // service's own pipeline → chaos applies
+                    TrafficSource.Query, 
+                    enforcedResilience: null,
                     cancellationToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)

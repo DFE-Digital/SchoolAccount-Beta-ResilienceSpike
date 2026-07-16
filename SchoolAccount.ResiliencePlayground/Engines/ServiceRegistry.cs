@@ -48,8 +48,11 @@ public static class ServiceRegistryCacheExtensions
         var section = builder.Configuration
             .GetSection(IntegrationSettings.SectionName);
 
-        if (!section.Exists()) throw new InvalidOperationException("Integration settings not found");
-
+        if (!section.Exists())
+        {
+            throw new InvalidOperationException("Integration settings not found");
+        }
+        
         builder.Services.Configure<IntegrationSettings>(
             builder.Configuration.GetSection(IntegrationSettings.SectionName)
         );
