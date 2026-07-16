@@ -9,7 +9,7 @@ This spike explored how we can handle downstream failures more gracefully, so th
 
 - A small emulated integration host with x independent downstream services. Initially with three, each able to simulate slow responses and failures.
 - A shared resilience layer built around Polly to apply retries, timeouts and circuit breakers per service.
-- A lightweight dashboard that queries each service independently and reports status per dependency, rather than treating every failure as a single shared outage [this was only implemented to make visuaulation of what Polly was doing easier to view compared to consuming logs & json responses].
+- A lightweight dashboard that queries each service independently and reports status per dependency, rather than treating every failure as a single shared outage [this was only implemented to make visualisation of what Polly was doing easier to view compared to consuming logs & json responses].
 
 ## Why this matters
 
