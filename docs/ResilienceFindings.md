@@ -1,6 +1,8 @@
 # Spike findings: resilience, retries, backoff and circuit breakers
 > Chris Kelly
 
+_These findings are only based off the work completed in the `SchoolAccount.ResiliencePlayground`, `SchoolAccount.ResiliencePlayground.Dashboard` & `SchoolAccount.ResiliencePlayground.EmulatedIntegration` projects._
+
 This spike explored how we can handle downstream failures more gracefully, so that each dependency can fail independently and show its own "service unavailable" behaviour rather than taking the whole experience down with it. The goal was to build a practical starting point for understanding how Polly-based resilience patterns could be applied in this repository.
 
 ## What was built
@@ -54,9 +56,22 @@ That is the real benefit of this approach. Instead of applying one fixed policy 
 
 In short, the platform defaults give us a sensible baseline, but a custom pipeline gives us the flexibility to make resilience more deliberate and more aligned to the downstream dependencies we are actually depending on.
 
+## Further notes
+
+The .NET guidance from [Resilience and chaos engineering - .NET Blog](https://devblogs.microsoft.com/dotnet/resilience-and-chaos-engineering/) is confirms these findings, "For our purposes, the chaos caused by the chaos strategies mentioned earlier can be effectively managed using the standard resilience handler. Generally, it’s advisable to use the standard handler unless you find it doesn’t meet your specific needs." That means the standard handler is a good default for this work, and we can still tune it per client using `AddStandardResilienceHandler().Configure()`.
+
+Its defaults are intentionally generic, but they can be adjusted for service-specific behaviour. For example, we can tune attempt timeouts, retry predicates, and circuit-breaker thresholds without abandoning the standard handler or hand-rolling a full custom pipeline. The `SchoolAccount.ResiliencePlayground` project experimented with this approach and showed that the documented standard handler can often cover the needs of a dependency while still allowing targeted tuning.
+
+Using the standard handler also lets us attach resilience directly to `HttpClient` without manually executing a custom pipeline. This is simpler and more consistent with the documented .NET resilience approach, though it does mean we trade some low-level pipeline control for a standard, maintainable integration model.
+
+For the chaos emulation, `Simmy` was not used because it is primarily a thread-based failure injection tool. The initial spike spec called for emulated downstream endpoints, which is why the `SchoolAccount.ResiliencePlayground.EmulatedIntegration` project was a better fit. Those experiments with failure rates and slow responses supported the conclusion that Polly’s defaults are a strong starting point until we can gather a richer understanding of a real downstream dependency.
+
+A key metric to remember is observability is also important here; resilience behaviour is most useful when retry counts, timeouts, and circuit-breaker state transitions are visible in telemetry and logs. That should be part of any next step as we move from experimentation to an operational integration. That layer of functionality hasn't been explored with the standard handler and should be a next step investigation, maybe alongside the Spike B work.
+
 ## My suggested next steps
 
 1. Tune/Understand retry and timeout values per service rather than relying on a single shared policy, this could be a multiple mixed state unit integration test which emulates failures with `Simmy` and outputs findings.
 2. Look at fallback behaviour or cached responses for more resilient user journeys.
 3. Look deeper at adding telemetry and tracing so retry and circuit-breaker transitions are visible in operation - this could accidently overlap with Spike B.
 4. Look into how resilience behaves in a multi-instance deployment and whether Redis or a shared coordination mechanism would be needed to avoid duplicate health checks or conflicting circuit-breaker states.
+5. Take the standard handler and see how easily telemtry and logs can be pulled / consumed. 
