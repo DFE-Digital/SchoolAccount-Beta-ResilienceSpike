@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{7F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolAccount.ResiliencePlayground.HealthChecksUI", "SchoolAccount.ResiliencePlayground.HealthChecksUI\SchoolAccount.ResiliencePlayground.HealthChecksUI.csproj", "{DB0AD16C-8249-4900-8F70-6C34AA634B29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolAccount.ResiliencePlayground.SimmySimplified", "SchoolAccount.ResiliencePlayground.SimmySimplified\SchoolAccount.ResiliencePlayground.SimmySimplified.csproj", "{C1DC5884-51EC-4525-8CBC-E897E341CFF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{DB0AD16C-8249-4900-8F70-6C34AA634B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB0AD16C-8249-4900-8F70-6C34AA634B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB0AD16C-8249-4900-8F70-6C34AA634B29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1DC5884-51EC-4525-8CBC-E897E341CFF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1DC5884-51EC-4525-8CBC-E897E341CFF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1DC5884-51EC-4525-8CBC-E897E341CFF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1DC5884-51EC-4525-8CBC-E897E341CFF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
