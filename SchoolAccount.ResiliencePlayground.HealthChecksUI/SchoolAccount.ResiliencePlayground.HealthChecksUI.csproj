@@ -19,4 +19,24 @@
         <ProjectReference Include="..\SchoolAccount.ResiliencePlayground\SchoolAccount.ResiliencePlayground.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="obj\Debug\net10.0\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="wwwroot\favicon.png" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+      <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+    </ItemGroup>
+
 </Project>
