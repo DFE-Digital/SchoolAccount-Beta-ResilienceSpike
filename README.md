@@ -186,6 +186,21 @@ Because the timeout sits *inside* the retry, each attempt gets its own fresh tim
 - Stays open for 15 seconds (`BreakDuration`), then moves to half-open to probe recovery.
 - Logs every state transition (open / closed / half-open).
 
+### Chaos strategies
+A selection of chaos strategies are implemented within the `Create()` method.
+
+**Latency**
+- `Enabled` defines if the strategy is invoked, it is true by default.
+- `InjectionRate` defines the probability of how often the strategy will be invoked.
+- `Latency` the latency in seconds defined before the call is completed.
+- `OnLatencyInjected` logs when the `Latency` strategy is invoked.
+
+**Fault**
+- `Enabled` defines if the strategy is invoked, it is true by default.
+- `InjectionRate` defines the probability of how often the strategy will be invoked.
+- `FaultGenerator` a function to define the fault is assigned when the strategy is invoked.
+- `OnFaultInjected` logs when the `Fault` strategy is invoked.
+
 ### `Monitor()`
 
 A minimal, non-generic retry-only pipeline (it doesn't inspect the HTTP response):
