@@ -10,6 +10,7 @@ A small playground for building and running resilience/emulation test integratio
 | `SchoolAccount.ResiliencePlayground.Dashboard` | a small ASP.NET app that shows the health/status of registered services. |
 | `SchoolAccount.ResiliencePlayground.EmulatedIntegration` | multiple small endpoints that emulate downstream integrations (A, B, C). |
 | `SchoolAccount.ResiliencePlayground.HealthChecksUI` | a dashboard app that utilises the ASP.NET HealthChecks UI.               |
+| `SchoolAccount.ResiliencePlayground.SimmySimplified | a simple Simmy application that implements chaos strategies into a resilience pipeline |  
 
 ## Build
 From the repository root run:
