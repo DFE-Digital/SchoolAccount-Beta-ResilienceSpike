@@ -1,5 +1,4 @@
-# Spike findings: resilience, retries, backoff and circuit breakers
-> Chris Kelly
+# Rawness of resiliency: retries, backoff and circuit breakers
 
 _These findings are only based off the work completed in the `SchoolAccount.ResiliencePlayground`, `SchoolAccount.ResiliencePlayground.Dashboard` & `SchoolAccount.ResiliencePlayground.EmulatedIntegration` projects._
 
